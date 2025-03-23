@@ -63,16 +63,16 @@ app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by username
+    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     // Check if password matches
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid email or password" });
     }
 
     // If match, respond with success (or token if you want)
@@ -134,7 +134,7 @@ app.post("/api/properties", async (req, res) => {
 app.get("/api/properties", async (req, res) => {
   try {
     // .populate('createdBy') to get user info from User model
-    const properties = await Property.find().populate("createdBy", "username");
+    const properties = await Property.find().populate("createdBy", "email");
     res.json(properties);
   } catch (err) {
     console.error("Get properties error:", err);
@@ -148,7 +148,7 @@ app.get("/api/properties/:id", async (req, res) => {
     const propertyId = req.params.id;
     const property = await Property.findById(propertyId).populate(
       "createdBy",
-      "username"
+      "email"
     );
     if (!property) {
       return res.status(404).json({ error: "Property not found" });
@@ -199,13 +199,13 @@ app.delete("/api/properties/:id", async (req, res) => {
 });
 
 // ADD PROPERTY TO WISHLIST
-app.post("/api/users/:username/wishlist", async (req, res) => {
+app.post("/api/users/:email/wishlist", async (req, res) => {
   try {
-    const { username } = req.params;
+    const { email } = req.params;
     const { propertyId } = req.body;
 
-    // Find the user by username
-    const user = await User.findOne({ username });
+    // Find the user by email
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -227,12 +227,12 @@ app.post("/api/users/:username/wishlist", async (req, res) => {
 });
 
 // FETCH WISHLISTED PROPERTIES
-app.get("/api/users/:username/wishlist", async (req, res) => {
+app.get("/api/users/:email/wishlist", async (req, res) => {
   try {
-    const { username } = req.params;
+    const { email } = req.params;
 
-    // Find the user by username
-    const user = await User.findOne({ username }).populate("wishlist");
+    // Find the user by email
+    const user = await User.findOne({ email }).populate("wishlist");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -246,13 +246,13 @@ app.get("/api/users/:username/wishlist", async (req, res) => {
 });
 
 // REMOVE PROPERTY FROM WISHLIST
-app.delete("/api/users/:username/wishlist", async (req, res) => {
+app.delete("/api/users/:email/wishlist", async (req, res) => {
   try {
-    const { username } = req.params;
+    const { email } = req.params;
     const { propertyId } = req.body;
 
-    // Find the user by username
-    const user = await User.findOne({ username });
+    // Find the user by email
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

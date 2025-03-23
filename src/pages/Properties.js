@@ -55,7 +55,7 @@ function Properties() {
   const [sortBy, setSortBy] = useState("recommended");
 
   // Auth/wishlist
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, email } = useAuth();
   const [wishlist, setWishlist] = useState([]);
 
   // Fetch all properties once
@@ -70,15 +70,15 @@ function Properties() {
 
   // Fetch wishlist if user is logged in
   useEffect(() => {
-    if (isLoggedIn && user) {
+    if (isLoggedIn && email) {
       axios
-        .get(`http://localhost:5001/api/users/${user}/wishlist`)
+        .get(`http://localhost:5001/api/users/${email}/wishlist`)
         .then((res) => {
           setWishlist(res.data.wishlist); // array of property documents
         })
         .catch((err) => console.error("Error fetching wishlist:", err));
     }
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn, email]);
 
   // Helper: is a property already in wishlist?
   const isPropertyWishlisted = (propertyId) => {
@@ -87,7 +87,7 @@ function Properties() {
 
   // Toggle wishlist
   const toggleWishlist = async (propertyId) => {
-    if (!isLoggedIn || !user) {
+    if (!isLoggedIn || !email) {
       console.error("User must be logged in to modify wishlist.");
       return;
     }
@@ -97,13 +97,13 @@ function Properties() {
     try {
       if (alreadyInWishlist) {
         // Remove from wishlist
-        await axios.delete(`http://localhost:5001/api/users/${user}/wishlist`, {
+        await axios.delete(`http://localhost:5001/api/users/${email}/wishlist`, {
           data: { propertyId },
         });
         setWishlist((prev) => prev.filter((p) => p._id !== propertyId));
       } else {
         // Add to wishlist
-        await axios.post(`http://localhost:5001/api/users/${user}/wishlist`, {
+        await axios.post(`http://localhost:5001/api/users/${email}/wishlist`, {
           propertyId,
         });
         // Find that property in allProperties

@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import ListProperty from "./pages/ListProperty";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import OtpVerification from "./pages/OtpVerification";
 
 // Import the new single-page component:
 import Properties from "./pages/Properties";
@@ -62,7 +63,7 @@ function App() {
                 <Route path="/list-property" element={<ListProperty />} />
                 <Route path="/saved" element={<Saved />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-
+                <Route path="/verify-otp" element={<OtpVerification />} />
               </Routes>
             </main>
             <Footer />
