@@ -9,6 +9,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import ListProperty from "./pages/ListProperty";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
 
 // Import the new single-page component:
 import Properties from "./pages/Properties";
@@ -60,6 +61,8 @@ function App() {
                 <Route path="/Signup" element={<Signup />} />
                 <Route path="/list-property" element={<ListProperty />} />
                 <Route path="/saved" element={<Saved />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
               </Routes>
             </main>
             <Footer />

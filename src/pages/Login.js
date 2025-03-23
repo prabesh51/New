@@ -53,13 +53,13 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const Login = () => {
   const navigate = useNavigate();
   const { login, error } = useAuth(); // get login function and error from context
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const success = await login(username, password);
+    const success = await login(email, password);
     if (success) {
       setOpenSnackbar(true);
       setTimeout(() => {
@@ -102,11 +102,11 @@ const Login = () => {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Email"
             autoFocus
             variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -125,6 +125,14 @@ const Login = () => {
             Sign In
           </StyledButton>
         </Box>
+
+        <Typography variant="body2" sx={{ mt: 2}}>
+          Forgot your password?{" "}
+            <Link to="/forgot-password" style={{ color: "#2B7B8C"}}>
+              Reset it
+            </Link>
+        </Typography>
+
 
         <Typography variant="body2" sx={{ mt: 2 }}>
           Don’t have an account?{" "}

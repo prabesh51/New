@@ -54,7 +54,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const Signup = () => {
   const navigate = useNavigate();
   const { signup, error } = useAuth();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -67,7 +67,7 @@ const Signup = () => {
       return;
     }
 
-    const success = await signup(username, password);
+    const success = await signup(email, password);
     if (success) {
       setOpenSnackbar(true);
       setTimeout(() => {
@@ -109,11 +109,11 @@ const Signup = () => {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Email"
             autoFocus
             variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             sx={{ mb: 2 }}
           />
           <TextField

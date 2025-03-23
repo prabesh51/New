@@ -37,10 +37,10 @@ app.get("/", (req, res) => {
 // SIGN UP
 app.post("/api/signup", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         error: "User already exists. Please choose a different name.",
@@ -48,7 +48,7 @@ app.post("/api/signup", async (req, res) => {
     }
 
     // Create a new user
-    const newUser = new User({ username, password });
+    const newUser = new User({ email, password });
     await newUser.save();
 
     return res.json({ message: "Signup successful!" });
@@ -61,10 +61,10 @@ app.post("/api/signup", async (req, res) => {
 // LOGIN
 app.post("/api/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Find user by username
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: "Invalid username or password" });
     }

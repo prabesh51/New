@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 
 // Define the schema (i.e., the structure) for your "User" collection
 const userSchema = new mongoose.Schema({
-  username: {
+  email: {
     type: String,
     required: true,
     unique: true, // No duplicate usernames
