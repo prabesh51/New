@@ -13,11 +13,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { userPool } from "./CognitoConfig";
-import {
-  CognitoUser,
-  AuthenticationDetails,
-} from "amazon-cognito-identity-js";
+import { CognitoUser, AuthenticationDetails } from "amazon-cognito-identity-js";
+import { userPool } from "./cognitoConfig"; // Import from config file
 
 const LoginPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#FFFFFF",
@@ -52,14 +49,18 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-
 const Login = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState(""); // Email as username
+  const [username, setUsername] = useState(""); // Email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(0); // 0: Login, 1: Enter email, 2: Enter code + new password
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [cognitoUser, setCognitoUser] = useState(null); // Store Cognito user for password reset
 
+  // Handle regular login
   const handleLogin = (e) => {
     e.preventDefault();
 
@@ -77,8 +78,56 @@ const Login = () => {
       onSuccess: () => {
         setOpenSnackbar(true);
         setTimeout(() => {
-          navigate("/"); // Redirect to home page
+          navigate("/");
         }, 1500);
+      },
+      onFailure: (err) => {
+        setError(err.message || JSON.stringify(err));
+      },
+    });
+  };
+
+  // Initiate forgot password flow
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    setForgotPasswordStep(1); // Show email input for forgot password
+    setError("");
+  };
+
+  // Send verification code to email
+  const handleSendCode = (e) => {
+    e.preventDefault();
+
+    const user = new CognitoUser({
+      Username: username,
+      Pool: userPool,
+    });
+
+    user.forgotPassword({
+      onSuccess: () => {
+        setForgotPasswordStep(2); // Move to code + new password step
+        setCognitoUser(user); // Store user for reset
+        setError("");
+      },
+      onFailure: (err) => {
+        setError(err.message || JSON.stringify(err));
+      },
+    });
+  };
+
+  // Confirm new password with verification code
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+
+    cognitoUser.confirmPassword(verificationCode, newPassword, {
+      onSuccess: () => {
+        setOpenSnackbar(true);
+        setForgotPasswordStep(0); // Return to login form
+        setUsername("");
+        setPassword("");
+        setVerificationCode("");
+        setNewPassword("");
+        setCognitoUser(null);
       },
       onFailure: (err) => {
         setError(err.message || JSON.stringify(err));
@@ -102,7 +151,7 @@ const Login = () => {
           variant="h4"
           sx={{ mb: 3, fontWeight: 700, color: "#2B7B8C" }}
         >
-          Sign In
+          {forgotPasswordStep === 0 ? "Sign In" : forgotPasswordStep === 1 ? "Forgot Password" : "Reset Password"}
         </Typography>
 
         {error && (
@@ -114,41 +163,131 @@ const Login = () => {
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Email"
-            autoFocus
-            variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            variant="outlined"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            sx={{ mb: 2 }}
-          />
+        <Box
+          component="form"
+          onSubmit={
+            forgotPasswordStep === 0
+              ? handleLogin
+              : forgotPasswordStep === 1
+              ? handleSendCode
+              : handleResetPassword
+          }
+          sx={{ width: "100%" }}
+        >
+          {forgotPasswordStep === 0 && (
+            <>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Email"
+                autoFocus
+                variant="outlined"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                variant="outlined"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <StyledButton type="submit" fullWidth variant="contained">
+                Sign In
+              </StyledButton>
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                <Link
+                  to="#"
+                  onClick={handleForgotPassword}
+                  style={{ color: "#2B7B8C" }}
+                >
+                  Forgot Password?
+                </Link>
+              </Typography>
+            </>
+          )}
 
-          <StyledButton type="submit" fullWidth variant="contained">
-            Sign In
-          </StyledButton>
+          {forgotPasswordStep === 1 && (
+            <>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Email"
+                autoFocus
+                variant="outlined"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <StyledButton type="submit" fullWidth variant="contained">
+                Send Verification Code
+              </StyledButton>
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                <Link
+                  to="#"
+                  onClick={() => setForgotPasswordStep(0)}
+                  style={{ color: "#2B7B8C" }}
+                >
+                  Back to Sign In
+                </Link>
+              </Typography>
+            </>
+          )}
+
+          {forgotPasswordStep === 2 && (
+            <>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Verification Code"
+                variant="outlined"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="New Password"
+                type="password"
+                variant="outlined"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <StyledButton type="submit" fullWidth variant="contained">
+                Reset Password
+              </StyledButton>
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                <Link
+                  to="#"
+                  onClick={() => setForgotPasswordStep(0)}
+                  style={{ color: "#2B7B8C" }}
+                >
+                  Back to Sign In
+                </Link>
+              </Typography>
+            </>
+          )}
         </Box>
 
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          Don’t have an account?{" "}
-          <Link to="/signup" style={{ color: "#2B7B8C" }}>
-            Sign up
-          </Link>
-        </Typography>
+        {forgotPasswordStep === 0 && (
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Don’t have an account?{" "}
+            <Link to="/signup" style={{ color: "#2B7B8C" }}>
+              Sign up
+            </Link>
+          </Typography>
+        )}
       </LoginPaper>
 
       <Snackbar
@@ -162,7 +301,9 @@ const Login = () => {
           severity="success"
           sx={{ borderRadius: "8px" }}
         >
-          Logged in successfully!
+          {forgotPasswordStep === 2
+            ? "Password reset successfully! Please sign in."
+            : "Logged in successfully!"}
         </Alert>
       </Snackbar>
     </Container>
