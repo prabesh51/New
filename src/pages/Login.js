@@ -14,7 +14,7 @@ import {
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { CognitoUser, AuthenticationDetails } from "amazon-cognito-identity-js";
-import { userPool } from "./cognitoConfig"; // Import from config file
+import { userPool } from "./CognitoConfig"; // Import from config file
 
 const LoginPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#FFFFFF",
