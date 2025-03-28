@@ -13,8 +13,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { userPool } from "./CognitoConfig";
 import {
-  CognitoUserPool,
   CognitoUser,
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
@@ -52,11 +52,6 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const poolData = {
-  UserPoolId: "ap-southeast-2_KusKuDFkE", // Replace with your Cognito User Pool ID
-  ClientId: "708ncs96mul6cfcff7p1b2qqpe", // Replace with your Cognito Client ID
-};
-const userPool = new CognitoUserPool(poolData);
 
 const Login = () => {
   const navigate = useNavigate();
