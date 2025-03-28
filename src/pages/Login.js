@@ -54,7 +54,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const poolData = {
   UserPoolId: "ap-southeast-2_KusKuDFkE", // Replace with your Cognito User Pool ID
-  ClientId: "4c9gs1qv77nfvlbarpug4k2jrp", // Replace with your Cognito Client ID
+  ClientId: "708ncs96mul6cfcff7p1b2qqpe", // Replace with your Cognito Client ID
 };
 const userPool = new CognitoUserPool(poolData);
 
