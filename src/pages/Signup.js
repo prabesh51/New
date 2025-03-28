@@ -1,11 +1,8 @@
-
-// Signup.js
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Container,
-  Paper, 
+  Paper,
   Typography,
   TextField,
   Button,
@@ -16,7 +13,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useAuth } from "./AuthContext";
+import { CognitoUserPool } from "amazon-cognito-identity-js";
 
 const SignupPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#FFFFFF",
@@ -51,29 +48,39 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+const poolData = {
+  UserPoolId: "ap-southeast-2_KusKuDFkE", // Replace with your Cognito User Pool ID
+  ClientId: "4c9gs1qv77nfvlbarpug4k2jrp", // Replace with your Cognito Client ID
+};
+const userPool = new CognitoUserPool(poolData);
+
 const Signup = () => {
   const navigate = useNavigate();
-  const { signup, error } = useAuth();
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(""); // Email as username
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  const handleSignup = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
 
     if (password !== confirmPass) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
-    const success = await signup(username, password);
-    if (success) {
+    const attributeList = [];
+    userPool.signUp(username, password, attributeList, null, (err, result) => {
+      if (err) {
+        setError(err.message || JSON.stringify(err));
+        return;
+      }
       setOpenSnackbar(true);
       setTimeout(() => {
-        navigate("/");
+        navigate("/verify-otp", { state: { email: username } }); // Redirect to OTP page with email
       }, 1500);
-    }
+    });
   };
 
   const handleCloseSnackbar = () => {
@@ -109,7 +116,7 @@ const Signup = () => {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Email"
             autoFocus
             variant="outlined"
             value={username}
@@ -152,7 +159,6 @@ const Signup = () => {
         </Typography>
       </SignupPaper>
 
-      {/* Snackbar for success */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
@@ -164,7 +170,7 @@ const Signup = () => {
           severity="success"
           sx={{ borderRadius: "8px" }}
         >
-          Successfully signed up!
+          Successfully signed up! Please verify your email with OTP.
         </Alert>
       </Snackbar>
     </Container>

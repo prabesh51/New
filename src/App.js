@@ -9,6 +9,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import ListProperty from "./pages/ListProperty";
 import Signup from "./pages/Signup";
+import VerifyOtp from "./pages/VerifyOtp";
 
 // Import the new single-page component:
 import Properties from "./pages/Properties";
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/Signup" element={<Signup />} />
+                <Route path="/verify-otp" element={<VerifyOtp />} />
                 <Route path="/list-property" element={<ListProperty />} />
                 <Route path="/saved" element={<Saved />} />
               </Routes>

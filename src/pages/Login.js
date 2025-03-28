@@ -1,5 +1,3 @@
-// Login.js
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -15,7 +13,11 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useAuth } from "./AuthContext"; // updated import
+import {
+  CognitoUserPool,
+  CognitoUser,
+  AuthenticationDetails,
+} from "amazon-cognito-identity-js";
 
 const LoginPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#FFFFFF",
@@ -50,22 +52,43 @@ const StyledButton = styled(Button)(({ theme }) => ({
   },
 }));
 
+const poolData = {
+  UserPoolId: "ap-southeast-2_KusKuDFkE", // Replace with your Cognito User Pool ID
+  ClientId: "4c9gs1qv77nfvlbarpug4k2jrp", // Replace with your Cognito Client ID
+};
+const userPool = new CognitoUserPool(poolData);
+
 const Login = () => {
   const navigate = useNavigate();
-  const { login, error } = useAuth(); // get login function and error from context
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(""); // Email as username
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    const success = await login(username, password);
-    if (success) {
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
-    }
+
+    const authenticationDetails = new AuthenticationDetails({
+      Username: username,
+      Password: password,
+    });
+
+    const user = new CognitoUser({
+      Username: username,
+      Pool: userPool,
+    });
+
+    user.authenticateUser(authenticationDetails, {
+      onSuccess: () => {
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          navigate("/"); // Redirect to home page
+        }, 1500);
+      },
+      onFailure: (err) => {
+        setError(err.message || JSON.stringify(err));
+      },
+    });
   };
 
   const handleCloseSnackbar = () => {
@@ -87,7 +110,6 @@ const Login = () => {
           Sign In
         </Typography>
 
-        {/* If there's an error from the server, show it */}
         {error && (
           <Alert
             severity="error"
@@ -102,7 +124,7 @@ const Login = () => {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Email"
             autoFocus
             variant="outlined"
             value={username}
@@ -134,7 +156,6 @@ const Login = () => {
         </Typography>
       </LoginPaper>
 
-      {/* Snackbar for success */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
